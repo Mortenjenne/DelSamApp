@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DelSam</title>
+    <link href="../public/css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet"/>
+</head>
+<body>
+
+
+<h1>Welcome to Message Board</h1>
+<form th:action="@{/login}" method="post">
+    <label for="username">Enter username</label>
+    <input type="text" id="username" name="username" placeholder="Enter username">
+    <br><br>
+
+    <label for="password">Enter password</label>
+    <input type="password" id="password" name="password" placeholder="Enter password">
+    <br>
+
+    <button type="submit">Login</button>
+    <br>
+
+    <p class="errorLogin" th:text="${errorLogin}"></p>
+</form>
+
+
+<br>
+<a th:href="@{/createUser}">Create new account</a>
+
+<div th:if="${session.currentUser != null}">
+    <span th:text="${session.currentUser.userName}"> | </span>
+    <a href="index.html" th:href="@{/logout}">Logout</a>
+</div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DelSam</title>
+</head>
+<body>
+<h1>Message Board</h1>
+<p class="welcomemessage" th:text="${welcomemessage}" ></p>
+
+<a th:href="@{/createPost}">Skab et nyt indlæg</a>
+
+<!--<table>
+    <thead>
+    <tr>Messages</tr>
+    </thead>
+    <tbody>
+    <tr th:each="message: ${messages}">
+        <td th:text="@{message.name}"></td>
+    </tr>
+    </tbody>
+</table>-->
+<div th:if="${session.currentUser != null}">
+    <span th:text="${session.currentUser.userName}"></span> |
+    <a href="index.html" th:href="@{/logout}">Logout</a>
+</div>
+</body>
+</html>
