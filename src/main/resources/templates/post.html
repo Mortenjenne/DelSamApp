@@ -6,26 +6,29 @@
     <link href="../public/css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet"/>
 </head>
 <body>
+
+<div th:replace="~{fragments :: navbar}"></div>
+
 <div class="singlePost">
-    <h1 th:text="${post.postDTO.title}">Post Title</h1>
-    <p th:text="${post.postDTO.message}">Post content</p>
-    <small>Posted by: <span th:text="${post.postDTO.authorName}">Author</span></small>
-    <small th:text="${post.postDTO.getRelativeTime()}">timestamp</small>
+    <h1 th:text="${postAndComment.post.title}">Post Title</h1>
+    <p th:text="${postAndComment.post.message}">Post content</p>
+    <small>Posted by: <span th:text="${postAndComment.post.authorName}">Author</span></small>
+    <small th:text="${postAndComment.post.relativeTime}">timestamp</small>
 </div>
 
 <hr>
 
 <div class="comments">
     <h2>Comments</h2>
-    <div th:if="${post.comments != null and !post.comments.isEmpty()}">
-        <div th:each="comment : ${post.comments}">
-            <p><strong th:text="${comment.author}">Author</strong></p>
+    <div th:if="${postAndComment.comments != null and #lists.size(postAndComment.comments) > 0}">
+        <div th:each="comment : ${postAndComment.comments}">
+            <p><strong th:text="${comment.authorName}">Author</strong></p>
             <p th:text="${comment.content}">Comment content</p>
-            <p><small th:text="${comment.getRelativeTime()}">timestamp</small></p>
+            <p><small th:text="${comment.relativeTime}">timestamp</small></p>
             <hr>
         </div>
     </div>
-    <div th:if="${post.comments == null or post.comments.isEmpty()}">
+    <div th:if="${postAndComment.comments == null or #lists.size(postAndComment.comments) == 0}">
         <p>No comments yet. Be the first to comment!</p>
     </div>
 </div>
@@ -33,7 +36,7 @@
 <hr>
 
 <div class="add-comment">
-    <form th:action="@{/post/{id}/comment(id=${post.postDTO.postId})}" method="post">
+    <form th:action="@{/post/{id}/comment(id=${postAndComment.post.postId})}" method="post">
         <label for="body">Add Comment</label><br>
         <textarea id="body" name="body" rows="2" required></textarea><br>
         <button type="submit">Post Comment</button>

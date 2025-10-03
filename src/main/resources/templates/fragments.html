@@ -1,10 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
 </head>
 <body>
+
+<!-- Navigation Bar Fragment -->
+<nav th:fragment="navbar" class="navbar">
+    <div class="navbar-container">
+        <div class="navbar-brand">
+            <a th:href="@{/messages}">Message Board</a>
+        </div>
+
+        <div class="navbar-menu">
+            <a th:href="@{/messages}" class="nav-link">Home</a>
+            <a th:href="@{/createPost}" class="nav-link">Create Post</a>
+        </div>
+
+        <div class="navbar-user" th:if="${session.currentUser != null}">
+            <span class="username" th:text="${session.currentUser.userName}">Username</span>
+            <a th:href="@{/logout}" class="nav-link logout">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<!-- Dine andre fragments her -->
 
 </body>
 </html>

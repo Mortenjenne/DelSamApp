@@ -11,7 +11,6 @@ import app.services.PostService;
 import app.services.UserService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +33,7 @@ public class PostController {
 
         app.post("/createPost", ctx -> createPost(ctx));
         app.post("/upvote/{id}", ctx -> upvotePost(ctx));
-        app.post("/post{id}/comment", ctx -> createComment(ctx));
+        app.post("/post/{id}/comment", ctx -> createComment(ctx));
     }
 
     private void createComment(Context ctx) {
@@ -52,22 +51,30 @@ public class PostController {
 
     private void showPost(Context ctx) {
         int postId = Integer.parseInt(ctx.pathParam("id"));
+        System.out.println("Showing post with ID: " + postId); // DEBUG
         PostDTO postDTO = null;
         List<CommentDTO> commentDTOS = new ArrayList<>();
-         try {
+        try {
             postDTO = postService.getPostById(postId);
+            System.out.println("Post found: " + postDTO.getTitle()); // DEBUG
             commentDTOS = commentService.getAllCommentsInAPost(postId);
-            PostAndCommentDTO postAndCommentDTO = new PostAndCommentDTO(postDTO,commentDTOS);
+            System.out.println("Comments found: " + commentDTOS.size()); // DEBUG
+            PostAndCommentDTO postAndCommentDTO = new PostAndCommentDTO(postDTO, commentDTOS);
 
-            ctx.attribute("post",postAndCommentDTO);
+            ctx.attribute("postAndComment", postAndCommentDTO);
             ctx.render("post");
+            System.out.println("Rendering post.html"); // DEBUG
 
-        }catch (DatabaseException e){
-            //TODO
-            ctx.attribute("errorMessage",e.getMessage());
-             ctx.redirect("/messages");
+        } catch (DatabaseException e) {
+            System.out.println("Error: " + e.getMessage());
+            e.printStackTrace();// DEBUG
+            ctx.attribute("errorMessage", e.getMessage());
+            ctx.redirect("/messages");
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage()); // DEBUG
+            e.printStackTrace();
+            ctx.redirect("/messages");
         }
-
     }
 
     private void upvotePost(Context ctx) {

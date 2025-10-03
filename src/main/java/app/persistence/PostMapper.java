@@ -42,8 +42,7 @@ public class PostMapper {
     {
         Post post = null;
 
-        String sql = "select * from post p join users u on u.user_id = p.user_id" +
-        "WHERE p.post_id = ?";
+        String sql = "select * from post p join users u on u.user_id = p.user_id WHERE p.post_id =?";
 
         try (
                 Connection connection = ConnectionPool.getInstance().getConnection();

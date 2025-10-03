@@ -7,6 +7,6 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class PostAndCommentDTO {
-    PostDTO postDTO;
-    List<CommentDTO> commentDTOList;
+    PostDTO post;
+    List<CommentDTO> comments;
 }

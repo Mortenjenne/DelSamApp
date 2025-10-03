@@ -84,12 +84,15 @@ public class CommentMapper {
         try (Connection connection = ConnectionPool.getInstance().getConnection();
                 PreparedStatement ps = connection.prepareStatement(sql))
         {
+
+            ps.setInt(1,postId);
+
             ResultSet rs = ps.executeQuery();
             while (rs.next())
             {
                 int commentId = rs.getInt("comment_id");
                 int userId = rs.getInt("user_id");
-                String content = rs.getString("message");
+                String content = rs.getString("content");
                 Timestamp timeStamp = rs.getTimestamp("created_at");
 
                 result.add(new Comment(commentId,postId,userId,content,timeStamp));

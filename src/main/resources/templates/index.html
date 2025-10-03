@@ -6,7 +6,7 @@
     <link href="../public/css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet"/>
 </head>
 <body>
-
+<div th:replace="~{fragments :: navbar}"></div>
 
 <h1>Welcome to Message Board</h1>
 <form th:action="@{/login}" method="post">
