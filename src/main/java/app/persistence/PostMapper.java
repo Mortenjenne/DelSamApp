@@ -10,7 +10,7 @@ import java.util.List;
 public class PostMapper {
 
     public Post createPost(String title, String message, String authorName, int userId) throws DatabaseException {
-        String sql = "INSERT INTO post (title, message, user_id, upvotes) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO post (title, message, user_id) VALUES (?,?,?)";
         Post post = null;
 
         try (Connection connection = ConnectionPool.getInstance().getConnection();
@@ -19,7 +19,7 @@ public class PostMapper {
             ps.setString(1, title);
             ps.setString(2, message);
             ps.setInt(3, userId);
-            ps.setInt(4, 0);
+
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected == 1) {
                 ResultSet rs = ps.getGeneratedKeys();
@@ -73,7 +73,9 @@ public class PostMapper {
     public List<Post> getAllPosts() throws DatabaseException
     {
         List<Post> posts = new ArrayList<>();
-        String sql = "select * from post p join users u on u.user_id = p.user_id";
+        String sql = "SELECT p.post_id, p.title, p.message, u.username AS author_name, p.created_at, p.user_id\n" +
+                "FROM post p\n" +
+                "JOIN users u ON u.user_id = p.user_id;";
 
         try (
                 Connection connection = ConnectionPool.getInstance().getConnection();
@@ -87,7 +89,7 @@ public class PostMapper {
                 int postId = rs.getInt("post_id");
                 String title = rs.getString("title");
                 String message = rs.getString("message");
-                String authorName = rs.getString("username");
+                String authorName = rs.getString("author_name");
                 int userId = rs.getInt("user_id");
                 Timestamp timeStamp = rs.getTimestamp("created_at");
                 posts.add(new Post(postId, title, message, authorName, timeStamp,userId));
@@ -125,7 +127,7 @@ public class PostMapper {
     }
 
     public int getTotalPostUpvoteCount(int postId) throws DatabaseException {
-        String sql = "SELECT COUNT(*) \n" +
+        String sql = "SELECT COUNT(*) AS total \n" +
                 "FROM post_upvotes \n" +
                 "WHERE post_id = ?";
         int result = 0;
@@ -137,7 +139,7 @@ public class PostMapper {
             ResultSet rs = ps.executeQuery();
 
             if(rs.next()){
-                result = rs.getInt("count");
+                result = rs.getInt("total");
             }
 
         } catch (SQLException e) {
@@ -147,7 +149,7 @@ public class PostMapper {
         return result;
     }
 
-    public boolean upvotePost(int postId, int userId) throws DatabaseException {
+    public boolean upvotePost(int userId, int postId) throws DatabaseException {
         String sql = "INSERT INTO post_upvotes (user_id, post_id) \n" +
                 "VALUES (?, ?)";
         boolean result = false;
@@ -155,8 +157,8 @@ public class PostMapper {
         try (Connection connection = ConnectionPool.getInstance().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
 
-            ps.setInt(1, postId);
-            ps.setInt(2,userId);
+            ps.setInt(1, userId);
+            ps.setInt(2,postId);
             int rowsAffected = ps.executeUpdate();
 
             if(rowsAffected == 1){
@@ -209,7 +211,7 @@ public class PostMapper {
 
             ResultSet rs = ps.executeQuery();
             if(rs.next()){
-                result = true;
+                result = rs.getInt(1) > 0;
             }
 
         } catch (SQLException e) {

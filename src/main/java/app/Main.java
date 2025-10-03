@@ -3,13 +3,11 @@ package app;
 import app.config.ThymeleafConfig;
 import app.controllers.PostController;
 import app.controllers.UserController;
+import app.persistence.CommentMapper;
 import app.persistence.ConnectionPool;
 import app.persistence.PostMapper;
 import app.persistence.UserMapper;
-import app.services.PostService;
-import app.services.PostServiceImpl;
-import app.services.UserServiceImpl;
-import app.services.UserService;
+import app.services.*;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinThymeleaf;
 import java.util.logging.Logger;
@@ -37,9 +35,12 @@ public class Main {
         UserController userController = new UserController(userService);
         userController.addRoutes(app);
 
+        CommentMapper commentMapper = new CommentMapper();
+        CommentService commentService = new CommentServiceImpl(commentMapper,userMapper);
+
         PostMapper postMapper = new PostMapper();
-        PostService postService = new PostServiceImpl(postMapper);
-        PostController postController = new PostController(postService,userService);
+        PostService postService = new PostServiceImpl(postMapper,commentMapper);
+        PostController postController = new PostController(postService,userService,commentService);
         postController.addRoutes(app);
 
     }

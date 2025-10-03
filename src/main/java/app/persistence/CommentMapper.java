@@ -27,7 +27,7 @@ public class CommentMapper {
                 rs.next();
                 int commentId = rs.getInt(1);
                 Timestamp timeStamp = rs.getTimestamp("created_at");
-                comment = new Comment(commentId,postId,userId,content,timeStamp,0);
+                comment = new Comment(commentId,postId,userId,content,timeStamp);
 
             } else {
                 throw new DatabaseException("Fejl under oprettelse af en kommentar: ");
@@ -37,6 +37,21 @@ public class CommentMapper {
             throw new DatabaseException("Couldn't create post");
         }
         return comment;
+    }
+
+    public int getCommentCountByPostId(int postId) throws DatabaseException {
+        String sql = "SELECT COUNT(*) FROM comment WHERE post_id = ?";
+        try (Connection connection = ConnectionPool.getInstance().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, postId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Error counting comments", e);
+        }
+        return 0;
     }
 
     public boolean hasUserUpVotedComment(int user_id, int comment_id) throws DatabaseException {
@@ -76,9 +91,8 @@ public class CommentMapper {
                 int userId = rs.getInt("user_id");
                 String content = rs.getString("message");
                 Timestamp timeStamp = rs.getTimestamp("created_at");
-                int upvotes = rs.getInt("upvotes");
 
-                result.add(new Comment(commentId,postId,userId,content,timeStamp,upvotes));
+                result.add(new Comment(commentId,postId,userId,content,timeStamp));
             }
         }
         catch (SQLException e)

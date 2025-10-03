@@ -1,16 +1,22 @@
 package app.services;
 
+import app.dto.CommentDTO;
 import app.entities.Comment;
+import app.entities.User;
 import app.exceptions.DatabaseException;
 import app.persistence.CommentMapper;
+import app.persistence.UserMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
+    private final UserMapper userMapper;
 
-    public CommentServiceImpl(CommentMapper commentMapper) {
+    public CommentServiceImpl(CommentMapper commentMapper, UserMapper userMapper) {
         this.commentMapper = commentMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
@@ -29,11 +35,17 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public List<Comment> getAllCommentsInAPost(int postId) throws DatabaseException {
+    public List<CommentDTO> getAllCommentsInAPost(int postId) throws DatabaseException {
         List<Comment> comments = commentMapper.getAllCommentsInAPost(postId);
-        comments.sort((c1, c2) -> c2.getTimeStamp().compareTo(c1.getTimeStamp()));
+        List<CommentDTO> commentDTOS = new ArrayList<>();
 
-        return List.copyOf(comments);
+        for(Comment comment: comments){
+            User user = userMapper.getUserById(comment.getUserId());
+            commentDTOS.add(new CommentDTO(comment.getCommentId(),comment.getContent(),user.getUserName(),comment.getTimeStamp()));
+        }
+        commentDTOS.sort((c1, c2) -> c2.getCreatedAt().compareTo(c1.getCreatedAt()));
+
+        return List.copyOf(commentDTOS);
     }
 
     @Override

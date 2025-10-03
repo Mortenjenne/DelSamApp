@@ -1,17 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Post Details</title>
+    <link href="../public/css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet"/>
 </head>
 <body>
+<div class="singlePost">
+    <h1 th:text="${post.postDTO.title}">Post Title</h1>
+    <p th:text="${post.postDTO.message}">Post content</p>
+    <small>Posted by: <span th:text="${post.postDTO.authorName}">Author</span></small>
+    <small th:text="${post.postDTO.getRelativeTime()}">timestamp</small>
+</div>
 
+<hr>
 
-<form th:action=@"{(/addComment)}">
-  <label for="body">Kommentar</label><br><br>
-  <textarea id="body" name="body" th:placeholder="Kommentar til ${post.title}" rows="2" required></textarea><br>
+<div class="comments">
+    <h2>Comments</h2>
+    <div th:if="${post.comments != null and !post.comments.isEmpty()}">
+        <div th:each="comment : ${post.comments}">
+            <p><strong th:text="${comment.author}">Author</strong></p>
+            <p th:text="${comment.content}">Comment content</p>
+            <p><small th:text="${comment.getRelativeTime()}">timestamp</small></p>
+            <hr>
+        </div>
+    </div>
+    <div th:if="${post.comments == null or post.comments.isEmpty()}">
+        <p>No comments yet. Be the first to comment!</p>
+    </div>
+</div>
 
-  <button type="submit">Opret kommentar</button>
-</form>
+<hr>
+
+<div class="add-comment">
+    <form th:action="@{/post/{id}/comment(id=${post.postDTO.postId})}" method="post">
+        <label for="body">Add Comment</label><br>
+        <textarea id="body" name="body" rows="2" required></textarea><br>
+        <button type="submit">Post Comment</button>
+    </form>
+</div>
+
 </body>
 </html>

@@ -17,7 +17,10 @@
 <div th:if="${messages != null and !messages.isEmpty()}">
     <div th:each="post : ${messages}">
 
-        <a th:href="@{/post}"><h3 th:text="${post.title}">Post Title</h3></a>
+        <a th:href="@{/post/{id}(id=${post.postId})}">
+            <h3 th:text="${post.title}">Post Title</h3>
+        </a>
+
         <p th:text="${post.message}">Post content</p>
         <small>Posted by: <span th:text="${post.authorName}">Author</span></small>
         <small th:text="${post.getRelativeTime}">timestamp</small>
@@ -25,11 +28,16 @@
         <form th:action="@{/upvote/{id}(id=${post.postId})}" method="post">
             <button type="submit">
                 <img src="../public/images/like.svg" th:src="@{/images/like.svg}" alt="likebutton">
-                <span th:text="${post.upVotes}"></span>
+                <span th:text="${post.upvoteCount}"></span>
             </button>
         </form>
         <p th:text="${errorUpvote}"></p>
-        <!--<a th:href="@{/post}"><p>Comments: <span th:text="${totalComments}"></span></p></a>-->
+
+        <a th:href="@{/post/{id}(id=${post.postId})}" class="comment-button">
+            <img src="../public/images/comment.svg" th:src="@{/images/comment.svg}" alt="comment">
+            <span th:text="${post.commentCount}"></span>
+        </a>
+
         <hr>
     </div>
 </div>

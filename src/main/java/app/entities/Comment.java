@@ -13,5 +13,4 @@ public class Comment {
     private int userId;
     private String content;
     private Timestamp timeStamp;
-    private int upVote;
 }

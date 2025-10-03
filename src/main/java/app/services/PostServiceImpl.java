@@ -1,18 +1,23 @@
 package app.services;
 
+import app.dto.PostDTO;
 import app.entities.Post;
 import app.exceptions.DatabaseException;
+import app.persistence.CommentMapper;
 import app.persistence.PostMapper;
-
+import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class PostServiceImpl implements PostService{
 
     private PostMapper postMapper;
+    private CommentMapper commentMapper;
 
-    public PostServiceImpl(PostMapper postMapper) {
+    public PostServiceImpl(PostMapper postMapper, CommentMapper commentMapper) {
         this.postMapper = postMapper;
+        this.commentMapper = commentMapper;
     }
 
     @Override
@@ -24,20 +29,44 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public Post getPostById(int postId) throws DatabaseException {
+    public PostDTO getPostById(int postId) throws DatabaseException {
         Post post = postMapper.getPostById(postId);
         if (post == null) {
             throw new IllegalArgumentException("Didn't find a post matching your search");
         }
-        return post;
+        int upVotes = postMapper.getTotalPostUpvoteCount(postId);
+        int commentCount = commentMapper.getCommentCountByPostId(postId);
+        PostDTO postDTO = new PostDTO(
+                postId,
+                post.getTitle(),
+                post.getMessage(),
+                post.getAuthorName(),
+                post.getTimestamp(),
+                upVotes,
+                commentCount
+        );
+        return postDTO;
     }
 
     @Override
-    public List<Post> getAllPosts() throws DatabaseException {
+    public List<PostDTO> getAllPosts() throws DatabaseException {
         List<Post> posts = postMapper.getAllPosts();
-        posts.sort(Comparator.comparing(Post::getTimestamp).reversed());
+        List<PostDTO> postDTOS = new ArrayList<>();
 
-        return List.copyOf(posts);
+        if(!posts.isEmpty()) {
+            for (Post post : posts) {
+                int postId = post.getPostId();
+                String title = post.getTitle();
+                String message = post.getMessage();
+                String author = post.getAuthorName();
+                Timestamp createdAt = post.getTimestamp();
+                int upVotes = postMapper.getTotalPostUpvoteCount(postId);
+                int commentCount = commentMapper.getCommentCountByPostId(postId);
+                postDTOS.add(new PostDTO(postId, title, message, author, createdAt, upVotes, commentCount));
+            }
+            postDTOS.sort(Comparator.comparing(PostDTO::getCreatedAt).reversed());
+        }
+        return List.copyOf(postDTOS);
     }
 
     @Override
@@ -49,11 +78,12 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public boolean upvotePost(int userId, int postId) throws DatabaseException {
+    public void upvotePost(int userId, int postId) throws DatabaseException {
         if(hasUserUpVotedPost(userId,postId)){
-            throw new IllegalArgumentException("You have already upvoted this post!");
+            postMapper.deleteUserUpVote(userId,postId);
+        } else {
+            postMapper.upvotePost(userId,postId);
         }
-        return postMapper.upvotePost(postId);
     }
 
     @Override
@@ -62,7 +92,7 @@ public class PostServiceImpl implements PostService{
     }
 
     private boolean hasUserUpVotedPost(int userId, int postId) throws DatabaseException {
-        return postMapper.hasUserUpVotedComment(userId,postId);
+        return postMapper.hasUserUpVotedPost(userId,postId);
     }
 
     private void validateTitle(String title){
