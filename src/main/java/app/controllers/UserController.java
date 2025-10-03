@@ -18,25 +18,12 @@ public class UserController {
         app.post("/login", ctx -> login(ctx));
         app.get("/createUser", ctx -> ctx.render("createUser"));
         app.post("/createUser", ctx -> registerUser(ctx));
-        app.get("/msgboard", ctx -> msgboard(ctx));
         app.get("/logout", ctx -> logout(ctx));
     }
 
     private void logout(Context ctx) {
         ctx.req().getSession().invalidate();
         ctx.redirect("/");
-    }
-
-    private void msgboard(Context ctx) {
-        User currentUser = ctx.sessionAttribute("currentUser");
-
-        if (currentUser == null) {
-            ctx.redirect("/");
-            return;
-        }
-
-        ctx.attribute("welcomemessage", "Welcome back " + currentUser.getUserName() + ". Good to have you back");
-        ctx.render("msgboard");
     }
 
     private void registerUser(Context ctx) {
@@ -65,7 +52,7 @@ public class UserController {
 
             if (user != null) {
                 ctx.sessionAttribute("currentUser", user);
-                ctx.render("/msgboard");
+                ctx.redirect("/messages");
             } else {
                 ctx.attribute("errorLogin", "Invalid username or password");
                 ctx.render("index");

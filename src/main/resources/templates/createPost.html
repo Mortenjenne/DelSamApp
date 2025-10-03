@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Opret indlæg</title>
+</head>
+<body>
+<h1>Opret et nyt indlæg</h1>
+
+<form th:action="@{/createPost}" method="post">
+
+    <label for="title">Titel</label>
+    <input type="text" id="title" name="title" placeholder="Indtast en titel" required><br><br>
+
+    <label for="body">Brødtekst</label><br><br>
+    <textarea id="body" name="body" placeholder="Skriv dit indlæg her..." rows="5" required></textarea><br>
+
+    <button type="submit">Opret indlæg</button>
+</form>
+</body>
+</html>

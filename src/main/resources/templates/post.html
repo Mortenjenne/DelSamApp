@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<form th:action=@"{(/addComment)}">
+  <label for="body">Kommentar</label><br><br>
+  <textarea id="body" name="body" th:placeholder="Kommentar til ${post.title}" rows="2" required></textarea><br>
+
+  <button type="submit">Opret kommentar</button>
+</form>
+</body>
+</html>

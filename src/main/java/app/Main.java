@@ -1,9 +1,13 @@
 package app;
 
 import app.config.ThymeleafConfig;
+import app.controllers.PostController;
 import app.controllers.UserController;
 import app.persistence.ConnectionPool;
+import app.persistence.PostMapper;
 import app.persistence.UserMapper;
+import app.services.PostService;
+import app.services.PostServiceImpl;
 import app.services.UserServiceImpl;
 import app.services.UserService;
 import io.javalin.Javalin;
@@ -32,6 +36,11 @@ public class Main {
         UserService userService = new UserServiceImpl(userMapper);
         UserController userController = new UserController(userService);
         userController.addRoutes(app);
+
+        PostMapper postMapper = new PostMapper();
+        PostService postService = new PostServiceImpl(postMapper);
+        PostController postController = new PostController(postService,userService);
+        postController.addRoutes(app);
 
     }
 

@@ -2,27 +2,41 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>DelSam</title>
+    <title>Message Board</title>
+    <link href="../public/css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet"/>
 </head>
 <body>
-<h1>Message Board</h1>
-<p class="welcomemessage" th:text="${welcomemessage}" ></p>
+<h1 th:text="${welcomemessage}">Message Board</h1>
 
-<a th:href="@{/createPost}">Skab et nyt indlæg</a>
-
-<!--<table>
-    <thead>
-    <tr>Messages</tr>
-    </thead>
-    <tbody>
-    <tr th:each="message: ${messages}">
-        <td th:text="@{message.name}"></td>
-    </tr>
-    </tbody>
-</table>-->
 <div th:if="${session.currentUser != null}">
     <span th:text="${session.currentUser.userName}"></span> |
-    <a href="index.html" th:href="@{/logout}">Logout</a>
+    <a th:href="@{/logout}">Logout</a> |
+    <a th:href="@{/createPost}">Create Post</a>
 </div>
+
+<div th:if="${messages != null and !messages.isEmpty()}">
+    <div th:each="post : ${messages}">
+
+        <a th:href="@{/post}"><h3 th:text="${post.title}">Post Title</h3></a>
+        <p th:text="${post.message}">Post content</p>
+        <small>Posted by: <span th:text="${post.authorName}">Author</span></small>
+        <small th:text="${post.getRelativeTime}">timestamp</small>
+
+        <form th:action="@{/upvote/{id}(id=${post.postId})}" method="post">
+            <button type="submit">
+                <img src="../public/images/like.svg" th:src="@{/images/like.svg}" alt="likebutton">
+                <span th:text="${post.upVotes}"></span>
+            </button>
+        </form>
+        <p th:text="${errorUpvote}"></p>
+        <!--<a th:href="@{/post}"><p>Comments: <span th:text="${totalComments}"></span></p></a>-->
+        <hr>
+    </div>
+</div>
+
+<div th:if="${messages == null or messages.isEmpty()}">
+    <p>Ingen posts endnu. <a th:href="@{/createPost}">Opret den første!</a></p>
+</div>
+
 </body>
 </html>

@@ -16,11 +16,11 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public Post createPost(String title, String message, int userId) throws DatabaseException {
+    public Post createPost(String title, String message, String authorName, int userId) throws DatabaseException {
         validateTitle(title);
         validateMessage(message);
 
-        return postMapper.createPost(title,message,userId);
+        return postMapper.createPost(title,message,authorName,userId);
     }
 
     @Override
