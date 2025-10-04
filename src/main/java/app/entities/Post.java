@@ -17,6 +17,7 @@ public class Post {
     private String authorName;
     private Timestamp timestamp;
     private int userId;
+    private byte[] image;
 
     //TODO Image image Category Enum?
 

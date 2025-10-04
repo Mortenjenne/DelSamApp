@@ -6,23 +6,24 @@
     <link href="../public/css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet"/>
 </head>
 <body>
-<div th:replace="~{fragments :: navbar}"></div>
-
-<h1>Welcome to Message Board</h1>
+<div th:replace="~{fragments :: navigation}"></div>
+<h1>Velkommen til Debato</h1>
 <form th:action="@{/login}" method="post">
-    <label for="username">Enter username</label>
+    <h3>Log ind, eller opret en bruger, for at deltage i debatten</h3>
+    <label for="username">Brugernavn</label><br>
     <input type="text" id="username" name="username" placeholder="Enter username">
     <br><br>
 
-    <label for="password">Enter password</label>
+    <label for="password">Password</label><br>
     <input type="password" id="password" name="password" placeholder="Enter password">
-    <br>
+    <br><br>
 
     <button type="submit">Login</button>
     <br>
 
-    <p class="errorLogin" th:text="${errorLogin}"></p>
+    <p class="errorLabel" th:text="${errorLogin}"></p>
 </form>
+<p class="succesLabel" th:text="${message}"></p>
 
 
 <br>

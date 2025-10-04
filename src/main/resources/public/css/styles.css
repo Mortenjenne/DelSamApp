@@ -4,6 +4,61 @@ h1 {
     font-size: 3rem;
 }
 
-.errorLogin {
+.errorLabel {
     color: red;
+}
+
+.succesLabel{
+    color: green;
+}
+
+/* --- HEADER STYLING --- */
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #ffffff;
+    width: 80%;
+    padding: 0.8rem 1.2rem;
+    position: relative;
+}
+
+.header-logo img {
+    width: 5rem;
+    height: auto;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: #0077cc;    /* blå hover effekt */
+}
+
+.username {
+    margin-left: 10px;
+    font-style: italic;
+    font-weight: bold;
+    color: #555;
+}
+
+.logout {
+    color: #cc0000;
+    font-weight: 500;
+}
+
+body {
+    margin: 0;
+    padding-top: 70px; /* samme højde som header */
+    font-family: Arial, sans-serif;
 }

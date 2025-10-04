@@ -83,35 +83,31 @@ import java.sql.*;
             return result;
         }
 
-        public User createUser(String username, String password, String mail, String role) throws DatabaseException {
-            boolean result = false;
-            int newId = 0;
+        public User createUser(String username, String password, String email, String role) throws DatabaseException {
+            String sql = "INSERT INTO users (username, password, email, role) VALUES (?,?,?,?)";
             User user = null;
-            String sql = "insert into users (username, password, email, role) values (?,?,?,?)";
-            try (Connection connection = connectionPool.getConnection()) {
-                try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS )) {
-                    ps.setString(1, username);
-                    ps.setString(2, password);
-                    ps.setString(3, mail);
-                    ps.setString(4, role);
+            try (Connection con = ConnectionPool.getInstance().getConnection();
+                 PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-                    int rowsAffected = ps.executeUpdate();
-                    if (rowsAffected == 1){
-                        result = true;
-                    }
-                    ResultSet idResultset = ps.getGeneratedKeys();
-                    if (idResultset.next()){
-                        newId = idResultset.getInt(1);
-                        user = new User(newId,username,password,mail,role);
-                    }
+                ps.setString(1, username);
+                ps.setString(2, password);
+                ps.setString(3, email);
+                ps.setString(4, role);
+                ps.executeUpdate();
 
-                } catch (SQLException e) {
-                    throw new DatabaseException("Fejl ved hentning af alle medlemmer: " + e.getMessage(), e);
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    int userId = rs.getInt(1);
+                    user = new User(userId, password, username, email, role);
+                    return user;
                 }
+                throw new DatabaseException("User could not be created");
+
+            } catch (SQLIntegrityConstraintViolationException e) {
+                throw new DatabaseException("Username or email already exists", e);
             } catch (SQLException e) {
-                throw new DatabaseException("Kunne ikke oprette forbindelse til databasen: " + e.getMessage(), e);
+                throw new DatabaseException("Database error creating user", e);
             }
-            return user;
         }
 
         public boolean updateUser(User user) throws DatabaseException {
@@ -143,13 +139,16 @@ import java.sql.*;
 
         public boolean emailExists(String email) throws DatabaseException {
             boolean result = false;
-            String sql = "SELECT FROM user WHERE email = ?";
+            String sql = "SELECT COUNT(*) FROM users WHERE email = ?";;
             try(Connection connection = connectionPool.getConnection();
                 PreparedStatement ps = connection.prepareStatement(sql)){
 
-                int rowsAffected = ps.executeUpdate();
-                if (rowsAffected == 1){
-                    result = true;
+                ps.setString(1,email);
+
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()){
+                    int count = rs.getInt(1);
+                    result = count > 0;
                 }
             }catch (SQLException e){
                 throw new DatabaseException("Fejl ved hentning af email");

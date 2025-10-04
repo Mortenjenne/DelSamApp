@@ -6,25 +6,28 @@
     <link href="../public/css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet"/>
 </head>
 <body>
-<h1>Create User</h1>
+<div th:replace="~{fragments :: navigation}"></div>
+<h1>Opret en bruger</h1>
 
 <form th:action="@{/createUser}" method="post">
-    <label for="username">Username:</label>
-    <input type="text" id="username" name="username" required>
-    <br><br>
+    <label for="username">Username:</label><br>
+    <input type="text" id="username" name="username" placeholder="Skriv dit brugernavn" th:value="${usernameValue}" required>
+    <p class="errorLabel" th:text="${errorUserName}"></p>
 
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" required>
-    <br><br>
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" placeholder="Skriv din email" th:value="${emailValue}" required>
+    <p class="errorLabel" th:text="${errorEmail}"></p>
 
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" required>
-    <br><br>
+    <label for="password1">Password:</label><br>
+    <input type="password" id="password1" name="password1" placeholder="Skriv dit password" required><br><br>
+
+    <input type="password" id="password2" name="password2" placeholder="Gentag dit password" required>
+    <p class="errorLabel" th:text="${errorPassword}"></p>
+    <br>
 
     <button type="submit">Create User</button>
 </form>
 
-<p th:text="${errorMessage}"></p>
 
 <br>
 <a th:href="@{/index.html}">Back to Home</a>

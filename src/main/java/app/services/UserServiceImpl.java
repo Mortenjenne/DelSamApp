@@ -29,14 +29,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User registerUser(String username, String password, String email, String role) throws DatabaseException {
-        //validateUsername(username);
-        //validateEmail(email);
-        //validatePassword(password);
-
-
+        validateUsername(username);
+        validateEmail(email);
+        validatePassword(password);
         //String hashedPassword = hashPassword(password);
-
-
         return userMapper.createUser(username, password, email, role);
     }
 

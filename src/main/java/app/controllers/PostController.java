@@ -11,7 +11,9 @@ import app.services.PostService;
 import app.services.UserService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+import io.javalin.http.UploadedFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,16 +108,42 @@ public class PostController {
     }
 
     private void createPost(Context ctx) throws DatabaseException {
-
         User currentUser = ctx.sessionAttribute("currentUser");
         String title = ctx.formParam("title");
         String body = ctx.formParam("body");
 
-        Post post = postService.createPost(title,body,currentUser.getUserName(),currentUser.getId());
+        // Håndter billede upload
+        byte[] imageData = null;
+        UploadedFile uploadedFile = ctx.uploadedFile("image");
 
+        if (uploadedFile != null) {
+            // Valider filstørrelse (max 5MB)
+            if (uploadedFile.size() > 5 * 1024 * 1024) {
+                ctx.attribute("errorMessage", "Billedet må max være 5MB");
+                ctx.render("createPost.html");
+                return;
+            }
+
+            // Valider filtype
+            String contentType = uploadedFile.contentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                ctx.attribute("errorMessage", "Kun billedfiler er tilladt");
+                ctx.render("createPost.html");
+                return;
+            }
+
+            // Læs billede data
+            try {
+                imageData = uploadedFile.content().readAllBytes();
+            } catch (IOException e) {
+                ctx.attribute("errorMessage", "Fejl ved læsning af billede");
+                ctx.render("createPost.html");
+                return;
+            }
+        }
+        Post post = postService.createPost(title, body, currentUser.getUserName(), currentUser.getId(), imageData);
         ctx.redirect("/messages");
     }
-
     private void showCreatePostForm(Context ctx) {
         ctx.render("createPost.html");
     }

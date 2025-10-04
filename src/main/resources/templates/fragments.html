@@ -5,26 +5,39 @@
 </head>
 <body>
 
-<!-- Navigation Bar Fragment -->
-<nav th:fragment="navbar" class="navbar">
-    <div class="navbar-container">
-        <div class="navbar-brand">
-            <a th:href="@{/messages}">Message Board</a>
+<!-- Header image bar Fragment -->
+
+<header th:fragment="navigation">
+    <div class="header-bar">
+        <!-- Logo -->
+        <div class="header-logo">
+            <a th:href="@{/messages}">
+                <img th:src="@{/images/logo.png}" alt="Debato Logo">
+            </a>
         </div>
 
-        <div class="navbar-menu">
-            <a th:href="@{/messages}" class="nav-link">Home</a>
-            <a th:href="@{/createPost}" class="nav-link">Create Post</a>
-        </div>
+        <!-- Navigation -->
+        <nav class="navbar">
+            <!-- Hvis bruger er logget ind -->
+            <div th:if="${session.currentUser != null}">
+                <a th:href="@{/messages}" class="nav-link">Message Board</a>
+                <a th:href="@{/createPost}" class="nav-link">Skab indhold</a>
+                <span class="username" th:text="${session.currentUser.userName}">Username</span>
+                <a th:href="@{/logout}" class="nav-link logout">Logout</a>
+            </div>
 
-        <div class="navbar-user" th:if="${session.currentUser != null}">
-            <span class="username" th:text="${session.currentUser.userName}">Username</span>
-            <a th:href="@{/logout}" class="nav-link logout">Logout</a>
-        </div>
+            <!-- Hvis bruger IKKE er logget ind -->
+            <div th:if="${session.currentUser == null}">
+                <a th:href="@{/}" class="nav-link">Login</a>
+                <a th:href="@{/createUser}" class="nav-link">Opret bruger</a>
+            </div>
+        </nav>
     </div>
-</nav>
+</header>
 
-<!-- Dine andre fragments her -->
+<!-- footer -->
+
+
 
 </body>
 </html>

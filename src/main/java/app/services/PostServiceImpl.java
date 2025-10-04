@@ -21,11 +21,13 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public Post createPost(String title, String message, String authorName, int userId) throws DatabaseException {
+    public Post createPost(String title, String message, String authorName, int userId, byte[] image) throws DatabaseException {
         validateTitle(title);
         validateMessage(message);
 
-        return postMapper.createPost(title,message,authorName,userId);
+        return postMapper.createPost(title,message,authorName,userId,image);
+
+
     }
 
     @Override
@@ -42,6 +44,7 @@ public class PostServiceImpl implements PostService{
                 post.getMessage(),
                 post.getAuthorName(),
                 post.getTimestamp(),
+                post.getImage(),
                 upVotes,
                 commentCount
         );
@@ -55,14 +58,19 @@ public class PostServiceImpl implements PostService{
 
         if(!posts.isEmpty()) {
             for (Post post : posts) {
-                int postId = post.getPostId();
-                String title = post.getTitle();
-                String message = post.getMessage();
-                String author = post.getAuthorName();
-                Timestamp createdAt = post.getTimestamp();
-                int upVotes = postMapper.getTotalPostUpvoteCount(postId);
-                int commentCount = commentMapper.getCommentCountByPostId(postId);
-                postDTOS.add(new PostDTO(postId, title, message, author, createdAt, upVotes, commentCount));
+                int upVotes = postMapper.getTotalPostUpvoteCount(post.getPostId());
+                int commentCount = commentMapper.getCommentCountByPostId(post.getPostId());
+                PostDTO postDTO = new PostDTO(
+                        post.getPostId(),
+                        post.getTitle(),
+                        post.getMessage(),
+                        post.getAuthorName(),
+                        post.getTimestamp(),
+                        post.getImage(),
+                        upVotes,
+                        commentCount
+                );
+                postDTOS.add(postDTO);
             }
             postDTOS.sort(Comparator.comparing(PostDTO::getCreatedAt).reversed());
         }

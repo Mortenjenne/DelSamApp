@@ -14,11 +14,20 @@ public class UserController {
     }
 
     public void addRoutes(Javalin app){
-        app.get("/", ctx -> ctx.render("index"));
+        app.get("/", ctx -> root(ctx));
         app.post("/login", ctx -> login(ctx));
         app.get("/createUser", ctx -> ctx.render("createUser"));
         app.post("/createUser", ctx -> registerUser(ctx));
         app.get("/logout", ctx -> logout(ctx));
+    }
+
+    private void root(Context ctx) {
+        String successMessage = ctx.sessionAttribute("successMessage");
+        if (successMessage != null) {
+            ctx.attribute("message", successMessage);
+            ctx.sessionAttribute("successMessage", null);
+        }
+        ctx.render("index");
     }
 
     private void logout(Context ctx) {
@@ -27,21 +36,42 @@ public class UserController {
     }
 
     private void registerUser(Context ctx) {
+        String username = ctx.formParam("username");
+        String password1 = ctx.formParam("password1");
+        String password2 = ctx.formParam("password2");
+        String email = ctx.formParam("email");
+        String role = "regularUser";
+
         try {
-            String username = ctx.formParam("username");
-            String password = ctx.formParam("password");
-            String email = ctx.formParam("email");
-            String role = "regularUser";
+            if (password1.equals(password2)) {
+                User user = userService.registerUser(username, password1, email, role);
+                ctx.sessionAttribute("successMessage", "Din bruger blev oprettet, nu kan du logge ind.");
 
-            User user = userService.registerUser(username, password, email, role);
+                ctx.redirect("/");
+            } else {
+                ctx.attribute("errorPassword", "Passwords er ikke identiske, prøv igen.");
+                ctx.attribute("usernameValue", username);
+                ctx.attribute("emailValue", email);
+                ctx.render("createUser");
+            }
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage().contains("Username")) {
+                ctx.attribute("errorUserName", e.getMessage());
+            } else if (e.getMessage().contains("Email")) {
+                ctx.attribute("errorEmail", e.getMessage());
+            } else if (e.getMessage().contains("Password")) {
+                ctx.attribute("errorPassword", e.getMessage());
+            }
+            ctx.attribute("usernameValue", username);
+            ctx.attribute("emailValue", email);
+            ctx.render("createUser");
 
-            ctx.redirect("/");
-
-        } catch (DatabaseException | IllegalArgumentException e) {
-            ctx.attribute("errorMessage", "Could not create user: " + e.getMessage());
+        } catch (DatabaseException e) {
+            ctx.attribute("errorEmail", e.getMessage());
             ctx.render("createUser");
         }
     }
+
 
     private void login(Context ctx) {
         String username = ctx.formParam("username");

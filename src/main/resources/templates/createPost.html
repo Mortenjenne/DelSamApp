@@ -5,7 +5,8 @@
     <title>Opret indlæg</title>
 </head>
 <body>
-<div th:replace="~{fragments :: navbar}"></div>
+<div th:replace="~{fragments :: navigation}"></div>
+
 <h1>Opret et nyt indlæg</h1>
 
 <form th:action="@{/createPost}" method="post">
@@ -15,6 +16,9 @@
 
     <label for="body">Brødtekst</label><br><br>
     <textarea id="body" name="body" placeholder="Skriv dit indlæg her..." rows="5" required></textarea><br>
+
+    <label for="image">Billede (valgfrit)</label><br>
+    <input type="file" id="image" name="image" accept="image/*"><br><br>
 
     <button type="submit">Opret indlæg</button>
 </form>

@@ -9,8 +9,9 @@ import java.util.List;
 
 public class PostMapper {
 
-    public Post createPost(String title, String message, String authorName, int userId) throws DatabaseException {
-        String sql = "INSERT INTO post (title, message, user_id) VALUES (?,?,?)";
+    public Post createPost(String title, String message, String authorName, int userId, byte[] image)
+            throws DatabaseException {
+        String sql = "INSERT INTO post (title, message, user_id, image) VALUES (?,?,?,?)";
         Post post = null;
 
         try (Connection connection = ConnectionPool.getInstance().getConnection();
@@ -20,20 +21,25 @@ public class PostMapper {
             ps.setString(2, message);
             ps.setInt(3, userId);
 
+            if (image != null) {
+                ps.setBytes(4, image);
+            } else {
+                ps.setNull(4, Types.BLOB);
+            }
+
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected == 1) {
                 ResultSet rs = ps.getGeneratedKeys();
                 rs.next();
                 int postId = rs.getInt(1);
                 Timestamp timeStamp = rs.getTimestamp("created_at");
-                post = new Post(postId, title, message, authorName, timeStamp,userId);
-
+                post = new Post(postId, title, message, authorName, timeStamp, userId, image);
             } else {
                 throw new DatabaseException("Fejl under indsætning af post: " + title);
             }
 
         } catch (SQLException e) {
-            throw new DatabaseException("Couldn't create post");
+            throw new DatabaseException("Couldn't create post: " + e.getMessage());
         }
         return post;
     }
@@ -58,8 +64,9 @@ public class PostMapper {
                 String authorName = rs.getString("username");
                 Timestamp timeStamp = rs.getTimestamp("created_at");
                 int userId = rs.getInt("user_id");
+                byte[] image = rs.getBytes("image");
 
-                post = new Post(postId, title, message, authorName, timeStamp, userId);
+                post = new Post(postId, title, message, authorName, timeStamp, userId,image);
             }
         }
         catch (SQLException e)
@@ -91,7 +98,8 @@ public class PostMapper {
                 String authorName = rs.getString("author_name");
                 int userId = rs.getInt("user_id");
                 Timestamp timeStamp = rs.getTimestamp("created_at");
-                posts.add(new Post(postId, title, message, authorName, timeStamp,userId));
+                byte[] image = rs.getBytes("image");
+                posts.add(new Post(postId, title, message, authorName, timeStamp,userId,image));
             }
         }
         catch (SQLException e)
