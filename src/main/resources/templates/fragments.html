@@ -35,9 +35,35 @@
     </div>
 </header>
 
-<!-- footer -->
+<!-- Footer Fragment -->
+<footer th:fragment="footer" class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h4>Debato</h4>
+            <p>Din platform for åben debat og meningsudveksling</p>
+        </div>
 
+        <div class="footer-section">
+            <h4>Links</h4>
+            <ul>
+                <li><a th:href="@{/about}">Om Debato</a></li>
+                <li><a th:href="@{/rules}">Debatregler</a></li>
+                <li><a th:href="@{/contact}">Kontakt</a></li>
+            </ul>
+        </div>
 
+        <div class="footer-section">
+            <h4>Information</h4>
+            <ul>
+                <li><a th:href="@{/privacy}">Privatlivspolitik</a></li>
+                <li><a th:href="@{/terms}">Brugervilkår</a></li>
+            </ul>
+        </div>
+    </div>
 
+    <div class="footer-bottom">
+        <p>&copy; 2025 Debato. Alle rettigheder forbeholdes.</p>
+    </div>
+</footer>
 </body>
 </html>

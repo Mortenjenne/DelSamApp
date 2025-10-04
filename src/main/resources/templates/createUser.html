@@ -7,29 +7,33 @@
 </head>
 <body>
 <div th:replace="~{fragments :: navigation}"></div>
-<h1>Opret en bruger</h1>
 
+<main class="content-container">
+
+<div class="form-container">
+    <h1>Opret en bruger</h1>
 <form th:action="@{/createUser}" method="post">
-    <label for="username">Username:</label><br>
+    <label for="username">Username:</label>
     <input type="text" id="username" name="username" placeholder="Skriv dit brugernavn" th:value="${usernameValue}" required>
     <p class="errorLabel" th:text="${errorUserName}"></p>
 
-    <label for="email">Email:</label><br>
+    <label for="email">Email:</label>
     <input type="email" id="email" name="email" placeholder="Skriv din email" th:value="${emailValue}" required>
     <p class="errorLabel" th:text="${errorEmail}"></p>
 
-    <label for="password1">Password:</label><br>
-    <input type="password" id="password1" name="password1" placeholder="Skriv dit password" required><br><br>
+    <label for="password1">Password:</label>
+    <input type="password" id="password1" name="password1" placeholder="Skriv dit password" required>
 
     <input type="password" id="password2" name="password2" placeholder="Gentag dit password" required>
     <p class="errorLabel" th:text="${errorPassword}"></p>
-    <br>
-
     <button type="submit">Create User</button>
 </form>
+</div>
 
-
-<br>
 <a th:href="@{/index.html}">Back to Home</a>
+
+
+</main>
+<div th:replace="~{fragments :: footer}"></div>
 </body>
 </html>

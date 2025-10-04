@@ -11,7 +11,7 @@ public class PostMapper {
 
     public Post createPost(String title, String message, String authorName, int userId, byte[] image)
             throws DatabaseException {
-        String sql = "INSERT INTO post (title, message, user_id, image) VALUES (?,?,?,?)";
+        String sql = "INSERT INTO post (title, message, user_id, image) VALUES (?,?,?,?::bytea)";
         Post post = null;
 
         try (Connection connection = ConnectionPool.getInstance().getConnection();
@@ -21,10 +21,12 @@ public class PostMapper {
             ps.setString(2, message);
             ps.setInt(3, userId);
 
-            if (image != null) {
+            if (image != null && image.length > 0) {
+                System.out.println("Uploading image, size: " + image.length + " bytes"); // DEBUG
                 ps.setBytes(4, image);
             } else {
-                ps.setNull(4, Types.BLOB);
+                System.out.println("No image data to upload"); // DEBUG
+                ps.setNull(4, Types.BINARY);
             }
 
             int rowsAffected = ps.executeUpdate();
@@ -32,8 +34,15 @@ public class PostMapper {
                 ResultSet rs = ps.getGeneratedKeys();
                 rs.next();
                 int postId = rs.getInt(1);
-                Timestamp timeStamp = rs.getTimestamp("created_at");
-                post = new Post(postId, title, message, authorName, timeStamp, userId, image);
+
+                // Hent posten igen for at få alle data inkl. created_at og image
+                Post createdPost = getPostById(postId);
+                if (createdPost != null) {
+                    post = createdPost;
+                } else {
+                    // Fallback hvis getPostById fejler
+                    post = new Post(postId, title, message, authorName, new Timestamp(System.currentTimeMillis()), userId, image);
+                }
             } else {
                 throw new DatabaseException("Fejl under indsætning af post: " + title);
             }
@@ -79,7 +88,7 @@ public class PostMapper {
     public List<Post> getAllPosts() throws DatabaseException
     {
         List<Post> posts = new ArrayList<>();
-        String sql = "SELECT p.post_id, p.title, p.message, u.username AS author_name, p.created_at, p.user_id\n" +
+        String sql = "SELECT p.post_id, p.title, p.message, p.image, u.username AS author_name, p.created_at, p.user_id\n" +
                 "FROM post p\n" +
                 "JOIN users u ON u.user_id = p.user_id;";
 

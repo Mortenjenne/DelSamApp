@@ -9,39 +9,55 @@
 
 <div th:replace="~{fragments :: navigation}"></div>
 
-<div class="singlePost">
-    <h1 th:text="${postAndComment.post.title}">Post Title</h1>
-    <p th:text="${postAndComment.post.message}">Post content</p>
-    <small>Posted by: <span th:text="${postAndComment.post.authorName}">Author</span></small>
-    <small th:text="${postAndComment.post.relativeTime}">timestamp</small>
-</div>
+<main class="content-container">
 
-<hr>
+    <!-- Selve post -->
+    <div class="single-post">
+        <h1 th:text="${postAndComment.post.title}">Post Title</h1>
 
-<div class="comments">
-    <h2>Comments</h2>
-    <div th:if="${postAndComment.comments != null and #lists.size(postAndComment.comments) > 0}">
-        <div th:each="comment : ${postAndComment.comments}">
-            <p><strong th:text="${comment.authorName}">Author</strong></p>
-            <p th:text="${comment.content}">Comment content</p>
-            <p><small th:text="${comment.relativeTime}">timestamp</small></p>
-            <hr>
+        <div th:if="${postAndComment.post.hasImage()}" class="post-image">
+            <img th:src="@{'data:image/jpeg;base64,' + ${postAndComment.post.imageBase64}}" alt="Post image">
+        </div>
+
+        <p class="post-full-content" th:text="${postAndComment.post.message}">Post content</p>
+
+        <div class="post-meta">
+            <span class="post-author">Posted by: <strong th:text="${postAndComment.post.authorName}">Author</strong></span>
+            <span class="post-time" th:text="${postAndComment.post.relativeTime}">timestamp</span>
         </div>
     </div>
-    <div th:if="${postAndComment.comments == null or #lists.size(postAndComment.comments) == 0}">
-        <p>No comments yet. Be the first to comment!</p>
+
+    <!-- Comments sektion -->
+    <div class="comments-section">
+        <h2>Comments (<span th:text="${#lists.size(postAndComment.comments)}">0</span>)</h2>
+
+        <div th:if="${postAndComment.comments != null and #lists.size(postAndComment.comments) > 0}" class="comments-list">
+            <div th:each="comment : ${postAndComment.comments}" class="comment-card">
+                <div class="comment-header">
+                    <strong class="comment-author" th:text="${comment.authorName}">Author</strong>
+                    <small class="comment-time" th:text="${comment.relativeTime}">timestamp</small>
+                </div>
+                <p class="comment-content" th:text="${comment.content}">Comment content</p>
+            </div>
+        </div>
+
+        <div th:if="${postAndComment.comments == null or #lists.size(postAndComment.comments) == 0}" class="empty-comments">
+            <p>Ingen kommentarer endnu. Vær den første til at kommentere!</p>
+        </div>
     </div>
-</div>
 
-<hr>
+    <!-- Add comment form -->
+    <div class="add-comment-section">
+        <h3>Tilføj kommentar</h3>
+        <form th:action="@{/post/{id}/comment(id=${postAndComment.post.postId})}" method="post" class="comment-form">
+            <label for="body">Din kommentar</label>
+            <textarea id="body" name="body" rows="4" placeholder="Skriv din kommentar her..." required></textarea>
+            <button type="submit">Send kommentar</button>
+        </form>
+    </div>
 
-<div class="add-comment">
-    <form th:action="@{/post/{id}/comment(id=${postAndComment.post.postId})}" method="post">
-        <label for="body">Add Comment</label><br>
-        <textarea id="body" name="body" rows="2" required></textarea><br>
-        <button type="submit">Post Comment</button>
-    </form>
-</div>
+</main>
 
+<div th:replace="~{fragments :: footer}"></div>
 </body>
 </html>

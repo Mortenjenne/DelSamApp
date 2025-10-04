@@ -8,40 +8,60 @@
 <body>
 <div th:replace="~{fragments :: navigation}"></div>
 
-<h1 th:text="${welcomemessage}">Message Board</h1>
+<main class="content-container">
+    <h1 th:text="${welcomemessage}">Message Board</h1>
+    <form class="form-container" th:action="@{/result}" method="post">
+        <h3>Søg efter indhold ved hjælp af titel</h3>
+        <input type="text" name="searchContent" placeholder="Søg her.." required>
+        <button type="submit">Søg</button>
+    </form>
 
+    <div th:if="${messages != null and !messages.isEmpty()}" class="posts-list">
+        <div th:each="post : ${messages}" class="post-card">
 
-<div th:if="${messages != null and !messages.isEmpty()}">
-    <div th:each="post : ${messages}">
+            <!-- Post titel -->
+            <a th:href="@{/post/{id}(id=${post.postId})}" class="post-title-link">
+                <h3 th:text="${post.title}">Post Title</h3>
+            </a>
 
-        <a th:href="@{/post/{id}(id=${post.postId})}">
-            <h3 th:text="${post.title}">Post Title</h3>
-        </a>
+            <!-- Post billede  -->
+            <div th:if="${post.hasImage()}" class="post-image">
+                <img th:src="@{'data:image/jpeg;base64,' + ${post.imageBase64}}" alt="Post image">
+            </div>
 
-        <p th:text="${post.message}">Post content</p>
-        <small>Posted by: <span th:text="${post.authorName}">Author</span></small>
-        <small th:text="${post.getRelativeTime}">timestamp</small>
+            <!-- Post indhold -->
+            <p class="post-content" th:text="${post.message}">Post content</p>
 
-        <form th:action="@{/upvote/{id}(id=${post.postId})}" method="post">
-            <button type="submit">
-                <img src="../public/images/like.svg" th:src="@{/images/like.svg}" alt="likebutton">
-                <span th:text="${post.upvoteCount}"></span>
-            </button>
-        </form>
-        <p th:text="${errorUpvote}"></p>
+            <!-- Post metadata (forfatter og tid) -->
+            <div class="post-meta">
+                <span class="post-author">Posted by: <strong th:text="${post.authorName}">Author</strong></span>
+                <span class="post-time" th:text="${post.getRelativeTime}">timestamp</span>
+            </div>
 
-        <a th:href="@{/post/{id}(id=${post.postId})}" class="comment-button">
-            <img src="../public/images/comment.svg" th:src="@{/images/comment.svg}" alt="comment">
-            <span th:text="${post.commentCount}"></span>
-        </a>
+            <!-- Post actions (upvote og comments) -->
+            <div class="post-actions">
+                <form th:action="@{/upvote/{id}(id=${post.postId})}" method="post" class="upvote-form">
+                    <button type="submit" class="action-btn">
+                        <img th:src="@{/images/like.svg}" alt="like">
+                        <span th:text="${post.upvoteCount}">0</span>
+                    </button>
+                </form>
 
-        <hr>
+                <a th:href="@{/post/{id}(id=${post.postId})}" class="action-btn comment-btn">
+                    <img th:src="@{/images/comment.svg}" alt="comment">
+                    <span th:text="${post.commentCount}">0</span>
+                </a>
+            </div>
+
+            <p class="errorLabel" th:text="${errorUpvote}"></p>
+        </div>
     </div>
-</div>
 
-<div th:if="${messages == null or messages.isEmpty()}">
-    <p>Ingen posts endnu. <a th:href="@{/createPost}">Opret den første!</a></p>
-</div>
+    <div th:if="${messages == null or messages.isEmpty()}" class="empty-state">
+        <p>Ingen posts endnu. <a th:href="@{/createPost}">Opret den første!</a></p>
+    </div>
+</main>
 
+<div th:replace="~{fragments :: footer}"></div>
 </body>
 </html>

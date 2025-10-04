@@ -53,27 +53,21 @@ public class PostController {
 
     private void showPost(Context ctx) {
         int postId = Integer.parseInt(ctx.pathParam("id"));
-        System.out.println("Showing post with ID: " + postId); // DEBUG
         PostDTO postDTO = null;
         List<CommentDTO> commentDTOS = new ArrayList<>();
         try {
             postDTO = postService.getPostById(postId);
-            System.out.println("Post found: " + postDTO.getTitle()); // DEBUG
             commentDTOS = commentService.getAllCommentsInAPost(postId);
-            System.out.println("Comments found: " + commentDTOS.size()); // DEBUG
             PostAndCommentDTO postAndCommentDTO = new PostAndCommentDTO(postDTO, commentDTOS);
 
             ctx.attribute("postAndComment", postAndCommentDTO);
             ctx.render("post");
-            System.out.println("Rendering post.html"); // DEBUG
 
         } catch (DatabaseException e) {
             System.out.println("Error: " + e.getMessage());
-            e.printStackTrace();// DEBUG
             ctx.attribute("errorMessage", e.getMessage());
             ctx.redirect("/messages");
         } catch (Exception e) {
-            System.out.println("Unexpected error: " + e.getMessage()); // DEBUG
             e.printStackTrace();
             ctx.redirect("/messages");
         }
@@ -103,7 +97,7 @@ public class PostController {
 
 
         ctx.attribute("messages", messages);
-        ctx.attribute("welcomemessage", "Welcome back " + currentUser.getUserName());
+        ctx.attribute("welcomemessage", "Velkommen tilbage " + currentUser.getUserName());
         ctx.render("msgboard");
     }
 
@@ -112,19 +106,16 @@ public class PostController {
         String title = ctx.formParam("title");
         String body = ctx.formParam("body");
 
-        // Håndter billede upload
         byte[] imageData = null;
         UploadedFile uploadedFile = ctx.uploadedFile("image");
 
         if (uploadedFile != null) {
-            // Valider filstørrelse (max 5MB)
             if (uploadedFile.size() > 5 * 1024 * 1024) {
                 ctx.attribute("errorMessage", "Billedet må max være 5MB");
                 ctx.render("createPost.html");
                 return;
             }
 
-            // Valider filtype
             String contentType = uploadedFile.contentType();
             if (contentType == null || !contentType.startsWith("image/")) {
                 ctx.attribute("errorMessage", "Kun billedfiler er tilladt");
@@ -132,9 +123,9 @@ public class PostController {
                 return;
             }
 
-            // Læs billede data
             try {
                 imageData = uploadedFile.content().readAllBytes();
+                uploadedFile.content().close();
             } catch (IOException e) {
                 ctx.attribute("errorMessage", "Fejl ved læsning af billede");
                 ctx.render("createPost.html");
