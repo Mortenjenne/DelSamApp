@@ -12,8 +12,11 @@ import app.services.UserService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import io.javalin.http.UploadedFile;
+import org.jetbrains.annotations.NotNull;
+
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +35,114 @@ public class PostController {
         app.get("/messages", ctx -> showAllMessages(ctx));
         app.get("/createPost", ctx -> showCreatePostForm(ctx));
         app.get("/post/{id}", ctx -> showPost(ctx));
+        app.get("/search", ctx -> search(ctx));
+        app.get("/post/{id}/edit",ctx -> showEditPost(ctx));
 
         app.post("/createPost", ctx -> createPost(ctx));
         app.post("/upvote/{id}", ctx -> upvotePost(ctx));
         app.post("/post/{id}/comment", ctx -> createComment(ctx));
+        app.post("/post/{id}/delete", ctx -> deletePost(ctx));
+        app.post("/post/{id}/edit", ctx -> editPost(ctx));
+
+    }
+
+    private void editPost(Context ctx) {
+        int postId = Integer.parseInt(ctx.pathParam("id"));
+        String title = ctx.formParam("title");
+        String body = ctx.formParam("body");
+        byte[] imageData = null;
+
+        UploadedFile uploadedFile = ctx.uploadedFile("image");
+
+        try {
+            if (uploadedFile != null) {
+                if (uploadedFile.size() > 5 * 1024 * 1024) {
+                    ctx.attribute("errorMessage", "Billedet må max være 5MB");
+                    PostDTO postDTO = postService.getPostById(postId);
+                    ctx.attribute("post", postDTO);
+                    ctx.render("editPost");
+                    return;
+                }
+
+                String contentType = uploadedFile.contentType();
+                if (contentType == null || !(contentType.startsWith("image/") || contentType.equals("application/octet-stream"))) {
+                    ctx.attribute("errorMessage", "Kun billedfiler (jpg, png, gif) er tilladt");
+                    PostDTO postDTO = postService.getPostById(postId);
+                    ctx.attribute("post", postDTO);
+                    ctx.render("editPost");
+                    return;
+                }
+
+                try (InputStream inputStream = uploadedFile.content()) {
+                    imageData = inputStream.readAllBytes();
+                } catch (IOException e) {
+                    ctx.attribute("errorMessage", "Fejl ved læsning af billede");
+                    PostDTO postDTO = postService.getPostById(postId);
+                    ctx.attribute("post", postDTO);
+                    ctx.render("editPost");
+                    return;
+                }
+            }
+
+            postService.updatePost(postId, title, body, imageData);
+            ctx.redirect("/messages");
+
+        } catch (DatabaseException e) {
+            ctx.attribute("errorMessage", e.getMessage());
+            try {
+                PostDTO postDTO = postService.getPostById(postId);
+                ctx.attribute("post", postDTO);
+            } catch (DatabaseException ex) {
+                ctx.attribute("post", null);
+            }
+            ctx.render("editPost");
+        }
+    }
+
+
+    private void showEditPost(Context ctx) {
+        int postId = Integer.parseInt(ctx.pathParam("id"));
+
+        try {
+            PostDTO postDTO = postService.getPostById(postId);
+            ctx.attribute("post",postDTO);
+            ctx.render("editPost");
+        } catch (DatabaseException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private void deletePost(Context ctx) {
+        int postid = Integer.parseInt(ctx.pathParam("id"));
+
+        try {
+            postService.delete(postid);
+            ctx.redirect("/messages");
+        } catch (DatabaseException e) {
+            ctx.attribute("errorUpvote",e.getMessage());
+            ctx.render("msgboard");
+        }
+    }
+
+    private void search(Context ctx){
+        String title = ctx.queryParam("searchContent").trim();
+
+        try {
+            List<PostDTO> result = postService.searchPostsByTitle(title);
+            ctx.attribute("messages",result);
+            ctx.attribute("welcomemessage", "Velkommen tilbage Debato");
+            ctx.render("msgboard");
+
+
+        }catch (IllegalArgumentException e){
+            ctx.attribute("errorSearch","Prøv igen title kan ikke være tom eller under 3 characters");
+            ctx.render("msgboard");
+
+        } catch (DatabaseException e){
+            ctx.attribute("errorSearch",e.getMessage());
+            ctx.render("msgboard");
+        }
     }
 
     private void createComment(Context ctx) {
@@ -117,15 +224,16 @@ public class PostController {
             }
 
             String contentType = uploadedFile.contentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                ctx.attribute("errorMessage", "Kun billedfiler er tilladt");
+            if (contentType == null ||
+                    !(contentType.startsWith("image/") || contentType.equals("application/octet-stream"))) {
+                ctx.attribute("errorMessage", "Kun billedfiler (jpg, png, gif) er tilladt");
                 ctx.render("createPost.html");
                 return;
             }
 
-            try {
-                imageData = uploadedFile.content().readAllBytes();
-                uploadedFile.content().close();
+            try (InputStream inputStream = uploadedFile.content()) {
+                imageData = inputStream.readAllBytes();
+
             } catch (IOException e) {
                 ctx.attribute("errorMessage", "Fejl ved læsning af billede");
                 ctx.render("createPost.html");

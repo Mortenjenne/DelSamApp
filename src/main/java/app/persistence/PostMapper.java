@@ -25,7 +25,6 @@ public class PostMapper {
                 System.out.println("Uploading image, size: " + image.length + " bytes"); // DEBUG
                 ps.setBytes(4, image);
             } else {
-                System.out.println("No image data to upload"); // DEBUG
                 ps.setNull(4, Types.BINARY);
             }
 
@@ -35,12 +34,10 @@ public class PostMapper {
                 rs.next();
                 int postId = rs.getInt(1);
 
-                // Hent posten igen for at få alle data inkl. created_at og image
                 Post createdPost = getPostById(postId);
                 if (createdPost != null) {
                     post = createdPost;
                 } else {
-                    // Fallback hvis getPostById fejler
                     post = new Post(postId, title, message, authorName, new Timestamp(System.currentTimeMillis()), userId, image);
                 }
             } else {
@@ -118,9 +115,9 @@ public class PostMapper {
         return posts;
     }
 
-    public boolean updatePost(int postId, String title, String message) throws DatabaseException {
+    public boolean updatePost(int postId, String title, String message, byte[] image) throws DatabaseException {
 
-        String sql = "UPDATE post SET title = ?, message = ? WHERE post_id = ?";
+        String sql = "UPDATE post SET title = ?, message = ?, image = ? WHERE post_id = ?";
         boolean result = false;
 
         try (Connection connection = ConnectionPool.getInstance().getConnection();
@@ -128,7 +125,14 @@ public class PostMapper {
 
             ps.setString(1, title);
             ps.setString(2, message);
-            ps.setInt(3, postId);
+
+            if (image != null) {
+                ps.setBytes(3, image);
+            } else {
+                ps.setNull(3, java.sql.Types.BINARY);
+            }
+
+            ps.setInt(4, postId);
 
             int rowsAffected = ps.executeUpdate();
 

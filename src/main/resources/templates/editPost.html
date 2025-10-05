@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link href="../public/css/styles.css" th:href="@{/css/styles.css}" rel="stylesheet"/>
+    <title>Rediger indlæg</title>
+</head>
+<body>
+<div th:replace="~{fragments :: navigation}"></div>
+
+<main class="content-container">
+    <div class="form-container">
+        <h1>Rediger indlæg</h1>
+        <form th:action="@{/post/{id}/edit(id=${post.postId})}" method="post" enctype="multipart/form-data">
+
+            <label for="title">Titel</label>
+            <input type="text" id="title" name="title" th:value="${post.title}" required>
+
+            <label for="body">Brødtekst</label>
+            <textarea id="body" name="body" rows="6" required th:text="${post.message}"></textarea>
+
+            <div th:if="${post.hasImage()}">
+                <p>Eksisterende billede:</p>
+                <img th:src="@{'data:image/jpeg;base64,' + ${post.imageBase64}}" alt="Eksisterende billede" style="max-width:300px;">
+            </div>
+
+            <label for="image">Erstat billede (valgfrit)</label>
+            <input type="file" id="image" name="image" accept="image/*">
+
+            <button type="submit">Gem ændringer</button>
+
+            <div th:if="${errorMessage}" class="error-label">
+                <p th:text="${errorMessage}"></p>
+            </div>
+
+        </form>
+    </div>
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+</body>
+</html>

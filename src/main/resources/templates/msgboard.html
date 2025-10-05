@@ -9,11 +9,13 @@
 <div th:replace="~{fragments :: navigation}"></div>
 
 <main class="content-container">
-    <h1 th:text="${welcomemessage}">Message Board</h1>
-    <form class="form-container" th:action="@{/result}" method="post">
+    <h1 th:text="${welcomemessage}"></h1>
+
+    <form class="form-container" th:action="@{/search}" method="get">
         <h3>Søg efter indhold ved hjælp af titel</h3>
         <input type="text" name="searchContent" placeholder="Søg her.." required>
         <button type="submit">Søg</button>
+        <p class="errorLabel" th:if="${errorSearch != null}" th:text="${errorSearch}"></p>
     </form>
 
     <div th:if="${messages != null and !messages.isEmpty()}" class="posts-list">
@@ -29,8 +31,7 @@
                 <img th:src="@{'data:image/jpeg;base64,' + ${post.imageBase64}}" alt="Post image">
             </div>
 
-            <!-- Post indhold -->
-            <p class="post-content" th:text="${post.message}">Post content</p>
+            <!-- Post indhold <p class="post-content" th:text="${post.message}">Post content</p> -->
 
             <!-- Post metadata (forfatter og tid) -->
             <div class="post-meta">
@@ -38,6 +39,7 @@
                 <span class="post-time" th:text="${post.getRelativeTime}">timestamp</span>
             </div>
 
+            <div class="post-actions-wrapper">
             <!-- Post actions (upvote og comments) -->
             <div class="post-actions">
                 <form th:action="@{/upvote/{id}(id=${post.postId})}" method="post" class="upvote-form">
@@ -51,6 +53,22 @@
                     <img th:src="@{/images/comment.svg}" alt="comment">
                     <span th:text="${post.commentCount}">0</span>
                 </a>
+            </div>
+
+            <div th:if="${session.currentUser.id == post.userId}" class="post-owner-actions">
+                <a th:href="@{/post/{id}/edit(id=${post.postId})}" class="action-btn edit-btn">
+                    <img th:src="@{/images/edit.svg}" alt="edit">
+                    <span>Rediger</span>
+                </a>
+
+                <form th:action="@{/post/{id}/delete(id=${post.postId})}" method="post" style="display: inline;">
+                    <button type="submit" class="action-btn delete-btn"
+                            onclick="return confirm('Er du sikker?')">
+                        <img th:src="@{/images/delete.svg}" alt="delete">
+                        <span>Slet</span>
+                    </button>
+                </form>
+            </div>
             </div>
 
             <p class="errorLabel" th:text="${errorUpvote}"></p>

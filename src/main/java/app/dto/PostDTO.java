@@ -1,5 +1,6 @@
 package app.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -10,6 +11,7 @@ import java.util.Base64;
 @Data
 public class PostDTO {
     private int postId;
+    private int userId;
     private String title;
     private String message;
     private String authorName;
@@ -18,6 +20,23 @@ public class PostDTO {
     private int upvoteCount;
     private int commentCount;
     private String imageBase64;
+
+
+    public PostDTO(int postId, int userId, String title, String message, String authorName,
+                   Timestamp createdAt, byte[] image, int upvoteCount, int commentCount) {
+        this.postId = postId;
+        this.userId = userId;
+        this.title = title;
+        this.message = message;
+        this.authorName = authorName;
+        this.createdAt = createdAt;
+        this.image = image;
+        this.upvoteCount = upvoteCount;
+        this.commentCount = commentCount;
+
+        convertImage();
+    }
+
 
     public PostDTO(int postId, String title, String message, String authorName,
                    Timestamp createdAt, byte[] image, int upvoteCount, int commentCount) {

@@ -5,10 +5,10 @@ import app.entities.Post;
 import app.exceptions.DatabaseException;
 import app.persistence.CommentMapper;
 import app.persistence.PostMapper;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class PostServiceImpl implements PostService{
 
@@ -26,8 +26,6 @@ public class PostServiceImpl implements PostService{
         validateMessage(message);
 
         return postMapper.createPost(title,message,authorName,userId,image);
-
-
     }
 
     @Override
@@ -62,6 +60,7 @@ public class PostServiceImpl implements PostService{
                 int commentCount = commentMapper.getCommentCountByPostId(post.getPostId());
                 PostDTO postDTO = new PostDTO(
                         post.getPostId(),
+                        post.getUserId(),
                         post.getTitle(),
                         post.getMessage(),
                         post.getAuthorName(),
@@ -78,11 +77,19 @@ public class PostServiceImpl implements PostService{
     }
 
     @Override
-    public boolean updatePost(int postId, String title, String message) throws DatabaseException {
+    public List<PostDTO> searchPostsByTitle(String title) throws DatabaseException {
+        validateTitle(title);
+                return getAllPosts().stream()
+                        .filter(post -> post.getTitle().toLowerCase().contains(title.toLowerCase()))
+                        .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean updatePost(int postId, String title, String message, byte[] imageData ) throws DatabaseException {
         validateTitle(title);
         validateMessage(message);
 
-        return postMapper.updatePost(postId,title,message);
+        return postMapper.updatePost(postId,title,message, imageData);
     }
 
     @Override
@@ -120,8 +127,8 @@ public class PostServiceImpl implements PostService{
         }
 
 
-        if (message.length() > 500) {
-            throw new IllegalArgumentException("Message is too long (max 500 characters)");
+        if (message.length() > 2000) {
+            throw new IllegalArgumentException("Message is too long (max 2000 characters)");
         }
     }
 }
